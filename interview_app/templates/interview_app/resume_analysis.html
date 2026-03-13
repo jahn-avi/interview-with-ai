@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analysis | Interview.AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    typography: {
+                        DEFAULT: {
+                            css: {
+                                color: '#374151',
+                                h1: { color: '#111827', fontWeight: '900' },
+                                h2: { color: '#111827', fontWeight: '800' },
+                                h3: { color: '#dc2626', fontWeight: '800', marginTop: '1.5em' },
+                                strong: { color: '#111827', fontWeight: '700' },
+                                li: { marginTop: '0.25em', marginBottom: '0.25em' },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        #loading-overlay { display: none; }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom Report Styling */
+        .prose h3 {
+            border-left: 4px solid #dc2626;
+            padding-left: 12px;
+            margin-top: 2rem !important;
+            margin-bottom: 1rem !important;
+        }
+        .prose ul { list-style-type: none !important; padding-left: 0 !important; }
+        .prose li::before {
+            content: "→";
+            color: #dc2626;
+            font-weight: bold;
+            display: inline-block; 
+            width: 1em;
+            margin-left: -1em;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <nav class="bg-white border-b p-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/dashboard/" class="text-2xl font-black text-red-600 tracking-tighter hover:opacity-80 transition">
+                INTERVIEW<span class="text-gray-400">.AI</span>
+            </a>
+            <a href="/dashboard/" class="text-gray-600 hover:text-red-600 font-bold transition flex items-center gap-2">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto py-12 px-6">
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-black text-gray-900 mb-4 tracking-tight">Resume <span class="text-red-600">Audit</span></h1>
+            <p class="text-gray-500 text-lg">AI-powered deep-dive analysis for <span class="font-bold text-gray-700">Data Science & CSE</span>.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-2xl border border-red-50 mb-12">
+            <form action="{% url 'resume_analysis' %}" method="POST" enctype="multipart/form-data" id="resumeForm">
+                {% csrf_token %}
+                <div class="relative border-4 border-dashed border-gray-100 rounded-2xl p-10 text-center hover:border-red-400 hover:bg-red-50/50 transition-all group cursor-pointer">
+                    <input type="file" name="resume" id="resumeInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf" required onchange="updateFileName()">
+                    <div class="bg-red-100 text-red-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl group-hover:scale-110 transition-transform">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <p id="file-name-display" class="text-xl font-bold text-gray-800 mb-2">Select your Resume (PDF)</p>
+                    <p class="text-gray-400 text-sm">Our AI will scan for ATS compatibility and impact.</p>
+                </div>
+
+                <div class="mt-8 flex justify-center">
+                    <button type="submit" class="bg-red-600 text-white px-12 py-4 rounded-xl font-black text-lg hover:bg-red-700 transition transform hover:scale-105 shadow-xl shadow-red-200 flex items-center gap-3">
+                        <i class="fas fa-wand-magic-sparkles"></i> Analyze with AI
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if feedback %}
+        <div class="animate-fade-in">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="md:col-span-1 bg-white p-8 rounded-3xl shadow-xl border-b-8 border-red-600 flex flex-col items-center justify-center text-center">
+                    <span class="text-gray-400 font-bold uppercase text-xs tracking-widest mb-2">AI Match Score</span>
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-gray-100" />
+                            <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-red-600" stroke-dasharray="364.4" stroke-dashoffset="364.4" id="scoreCircle" style="transition: stroke-dashoffset 1.5s ease-in-out;" />
+                        </svg>
+                        <span class="absolute text-4xl font-black text-gray-900" id="bigScore">--</span>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-2 bg-white p-8 rounded-3xl shadow-xl flex flex-col justify-center">
+                    <h3 class="text-xl font-black text-gray-900 mb-2">Recruiter Verdict</h3>
+                    <p class="text-gray-500 italic" id="verdictText">Processing AI insights...</p>
+                    <div class="mt-4 flex gap-2">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider">ATS Optimized</span>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase tracking-wider">Tech Focus</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden mb-12">
+                <div class="p-8 md:p-12">
+                    <div class="flex items-center gap-4 mb-10 pb-6 border-b border-gray-100">
+                        <div class="bg-red-600 text-white p-4 rounded-2xl shadow-lg shadow-red-100">
+                            <i class="fas fa-clipboard-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-gray-900">Analysis Report</h3>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Verification Complete</p>
+                        </div>
+                    </div>
+
+                    <div class="prose prose-red max-w-none" id="feedbackContent">
+                        {{ feedback|safe }}
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-6 flex justify-between items-center border-t border-gray-100 px-12">
+                    <p class="text-gray-400 text-sm font-medium italic">© 2026 Interview.AI Intelligence</p>
+                    <button onclick="window.print()" class="text-red-600 hover:text-red-800 font-bold flex items-center gap-2 transition">
+                        <i class="fas fa-file-download"></i> Save as PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const content = document.getElementById('feedbackContent').innerText;
+                // Regex looks for "Score: 75/100" or just "75/100"
+                const scoreMatch = content.match(/(\d{1,3})\/100/) || content.match(/Score:\s*(\d{1,3})/);
+                
+                if (scoreMatch) {
+                    const score = parseInt(scoreMatch[1]);
+                    document.getElementById('bigScore').innerText = score;
+                    
+                    // Circular progress logic
+                    const circle = document.getElementById('scoreCircle');
+                    const circumference = 364.4;
+                    const offset = circumference - (circumference * score / 100);
+                    circle.style.strokeDashoffset = offset;
+                    
+                    const verdict = document.getElementById('verdictText');
+                    if (score > 80) verdict.innerText = "Excellent! Your resume is highly competitive for 8th-sem Data Science roles.";
+                    else if (score > 60) verdict.innerText = "Solid foundation. A few strategic tweaks will help you pass top-tier ATS filters.";
+                    else verdict.innerText = "Action required. Follow the improvement steps below to increase your interview chances.";
+                }
+            });
+        </script>
+        {% endif %}
+
+        {% if error %}
+        <div class="bg-red-50 border-2 border-red-200 p-6 rounded-2xl text-red-600 font-bold flex items-center gap-4 animate-fade-in">
+            <i class="fas fa-triangle-exclamation text-2xl"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white/95 z-50 flex flex-col items-center justify-center">
+        <div class="w-20 h-20 border-8 border-gray-100 border-t-red-600 rounded-full animate-spin"></div>
+        <h2 class="text-3xl font-black text-gray-900 mt-8 tracking-tight">AI is thinking...</h2>
+        <p class="text-gray-500 mt-2">Processing your skills and experience</p>
+    </div>
+
+    <script>
+        function updateFileName() {
+            const input = document.getElementById('resumeInput');
+            const display = document.getElementById('file-name-display');
+            if (input.files.length > 0) {
+                display.innerText = "Ready: " + input.files[0].name;
+                display.classList.add('text-red-600');
+            }
+        }
+
+        document.getElementById('resumeForm').onsubmit = function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        };
+    </script>
+</body>
+</html>
