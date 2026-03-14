@@ -6,6 +6,10 @@ from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 from dotenv import load_dotenv
 import random
+import pyttsx3
+from django.http import JsonResponse
+import json
+import time
 
 # 1. Load Environment Variables
 load_dotenv()
@@ -176,3 +180,105 @@ def ai_questions(request):
 
     # Initial landing state (GET request)
     return render(request, 'interview_app/quiz_setup.html')
+
+def voice_interview_start(request):
+    if request.method == 'POST' and request.FILES.get('resume'):
+        # 1. Extract Resume Text (Reuse your existing function)
+        resume_file = request.FILES['resume']
+        fs = FileSystemStorage()
+        filename = fs.save(resume_file.name, resume_file)
+        path = fs.path(filename)
+        resume_content = extract_text_from_pdf(path)
+        
+        # 2. Store in session so the AI "remembers" it during the call
+        request.session['interview_context'] = resume_content
+        request.session['total_questions'] = int(request.POST.get('q_count', 7))
+        request.session['current_q_index'] = 1
+        
+        os.remove(path)
+        return render(request, 'interview_app/voice_session.html')
+    
+    return render(request, 'interview_app/voice_setup.html')
+
+def voice_setup(request):
+    """Step 1: Upload resume and configure question count."""
+    return render(request, 'interview_app/voice_setup.html')
+
+def voice_interview(request):
+    """Step 2: The actual voice session."""
+    if request.method == 'POST' and request.FILES.get('resume'):
+        resume_file = request.FILES['resume']
+        q_count = request.POST.get('q_count', 7)
+        
+        # Extract text using your existing helper
+        fs = FileSystemStorage()
+        filename = fs.save(resume_file.name, resume_file)
+        path = fs.path(filename)
+        resume_text = extract_text_from_pdf(path)
+        
+        # Clean up file after extraction
+        if os.path.exists(path):
+            os.remove(path)
+
+        # Pass resume context and count to the session template
+        return render(request, 'interview_app/voice_session.html', {
+            'resume_context': resume_text,
+            'total_questions': q_count,
+            'role': 'Candidate'
+        })
+    
+    return render(request, 'interview_app/voice_setup.html')
+
+def voice_setup(request):
+    return render(request, 'interview_app/voice_setup.html')
+
+def voice_interview(request):
+    if request.method == 'POST' and request.FILES.get('resume'):
+        resume_file = request.FILES['resume']
+        q_count = request.POST.get('q_count', 7)
+        
+        fs = FileSystemStorage()
+        filename = fs.save(resume_file.name, resume_file)
+        path = fs.path(filename)
+        resume_text = extract_text_from_pdf(path)
+        
+        if os.path.exists(path):
+            os.remove(path)
+
+        return render(request, 'interview_app/voice_session.html', {
+            'resume_context': resume_text,
+            'total_questions': q_count,
+        })
+    return render(request, 'interview_app/voice_setup.html')
+
+def voice_chat_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_speech = data.get('user_speech', "")
+            resume_context = data.get('resume_context', "")
+
+            prompt = f"""
+            You are a Senior Technical Interviewer. 
+            Resume: {resume_context}
+            Candidate said: "{user_speech}"
+            Action: Ask a short follow-up question (1-2 sentences).
+            """
+            
+            # Generate response
+            response = model.generate_content(prompt)
+            return JsonResponse({'ai_question': response.text})
+
+        except Exception as e:
+            # Check if it's a quota/rate limit error
+            error_msg = str(e).lower()
+            if "429" in error_msg or "quota" in error_msg:
+                print("Quota exceeded. Waiting 7 seconds...")
+                return JsonResponse({
+                    'ai_question': "I'm thinking deeply about your last point. Give me just a few seconds to process that."
+                })
+            
+            print(f"Server Error: {e}")
+            return JsonResponse({'error': 'Server Busy'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)

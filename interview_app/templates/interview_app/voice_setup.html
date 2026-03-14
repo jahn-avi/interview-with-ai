@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Setup | Interview.AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <nav class="bg-white border-b p-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/dashboard/" class="text-2xl font-black text-red-600 tracking-tighter hover:opacity-80 transition">
+                INTERVIEW<span class="text-gray-400">.AI</span>
+            </a>
+            <a href="/dashboard/" class="text-gray-600 hover:text-red-600 font-bold transition flex items-center gap-2">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="max-w-2xl mx-auto py-16 px-6">
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-black text-gray-900 mb-4 tracking-tight">Voice <span class="text-red-600">Calibration</span></h1>
+            <p class="text-gray-500 text-lg">Set up your AI interviewer with your latest profile.</p>
+        </div>
+
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-gray-100">
+            <form action="{% url 'voice_interview' %}" method="POST" enctype="multipart/form-data" class="space-y-8" id="voiceForm">
+                {% csrf_token %}
+                
+                <div class="relative border-4 border-dashed border-gray-100 rounded-[2rem] p-10 text-center hover:border-red-400 hover:bg-red-50/50 transition-all group cursor-pointer">
+                    <input type="file" name="resume" id="resumeInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf" required onchange="updateFileName()">
+                    <div class="bg-red-100 text-red-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl group-hover:scale-110 transition-transform">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <p id="file-name-display" class="text-xl font-bold text-gray-800 mb-2">Upload Resume (PDF)</p>
+                    <p class="text-gray-400 text-sm">The AI will use this to ask personalized questions.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Number of Questions</label>
+                    <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                        <input type="range" name="q_count" min="7" max="20" value="7" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600"
+                               oninput="this.nextElementSibling.value = this.value">
+                        <output class="block text-center font-black text-red-600 text-3xl mt-4">7</output>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 text-white py-6 rounded-3xl font-black text-xl hover:bg-red-700 transition transform hover:scale-[1.02] shadow-2xl shadow-red-200 flex items-center justify-center gap-3">
+                    <i class="fas fa-microphone-alt"></i> Start Voice Interview
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-gray-400 text-sm italic font-medium">Tip: Ensure your microphone is active for the best experience.</p>
+        </div>
+    </div>
+
+    <script>
+        function updateFileName() {
+            const input = document.getElementById('resumeInput');
+            const display = document.getElementById('file-name-display');
+            if (input.files.length > 0) {
+                display.innerText = "Ready: " + input.files[0].name;
+                display.classList.add('text-red-600');
+            }
+        }
+    </script>
+</body>
+</html>

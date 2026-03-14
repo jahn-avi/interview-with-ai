@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Session | Interview.AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .mic-pulse {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <nav class="bg-white border-b p-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/dashboard/" class="text-2xl font-black text-red-600 tracking-tighter">
+                INTERVIEW<span class="text-gray-400">.AI</span>
+            </a>
+            <a href="/dashboard/" class="text-gray-600 hover:text-red-600 font-bold transition flex items-center gap-2">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto mt-20 px-6 text-center">
+        <div class="bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-100">
+            <div id="mic-container" class="w-32 h-32 bg-red-600 rounded-full mx-auto mb-10 flex items-center justify-center text-white text-4xl shadow-xl transition-all duration-500">
+                <i class="fas fa-microphone" id="mic-icon"></i>
+            </div>
+
+            <h2 id="ai-status" class="text-3xl font-black text-gray-900 mb-6 tracking-tight">Ready?</h2>
+            
+            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100 min-h-[150px] flex items-center justify-center mb-8">
+                <p id="transcript" class="text-xl text-gray-600 italic leading-relaxed">
+                    Click "Start Session" to begin.
+                </p>
+            </div>
+
+            <button id="action-btn" onclick="startInterview()" class="bg-red-600 text-white px-12 py-5 rounded-2xl font-black text-xl hover:bg-red-700 transition transform hover:scale-105 shadow-xl shadow-red-100">
+                Start Session
+            </button>
+        </div>
+    </div>
+
+    {{ total_questions|json_script:"questions-count" }}
+    {{ resume_context|json_script:"resume-data" }}
+
+<script>
+    const totalQuestions = JSON.parse(document.getElementById('questions-count').textContent) || 7;
+    const resumeContext = JSON.parse(document.getElementById('resume-data').textContent);
+
+    const synth = window.speechSynthesis;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    let questionCount = 0;
+
+    // Start the process
+    async function startInterview() {
+        document.getElementById('action-btn').style.display = 'none';
+        // Fetch the first dynamic question
+        const firstQuestion = await fetchAIResponse(""); 
+        askQuestion(firstQuestion);
+    }
+
+    // Call your Django Brain (views.py)
+    async function fetchAIResponse(userText) {
+        document.getElementById('ai-status').innerText = "AI is thinking...";
+        try {
+            const response = await fetch('/voice-chat-api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    user_speech: userText,
+                    resume_context: resumeContext
+                })
+            });
+            const data = await response.json();
+            return data.ai_question;
+        } catch (error) {
+            console.error("API Error:", error);
+            return "I'm having a connection issue. Can you repeat that?";
+        }
+    }
+
+    // AI Speaks
+    function askQuestion(text) {
+        const utter = new SpeechUtterance(text);
+        const statusText = document.getElementById('ai-status');
+        const micContainer = document.getElementById('mic-container');
+        const transcript = document.getElementById('transcript');
+
+        utter.onstart = () => {
+            statusText.innerText = "AI is speaking...";
+            transcript.innerText = text;
+            micContainer.classList.remove('mic-pulse', 'bg-green-500');
+            micContainer.classList.add('bg-red-600');
+        };
+
+        utter.onend = () => {
+            startListening(); // AI finished, now it's your turn
+        };
+
+        synth.speak(utter);
+    }
+
+    // Open Microphone
+    function startListening() {
+        const statusText = document.getElementById('ai-status');
+        const micContainer = document.getElementById('mic-container');
+        
+        statusText.innerText = "Listening...";
+        micContainer.classList.add('mic-pulse', 'bg-green-500');
+        micContainer.classList.remove('bg-red-600');
+        
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error("Mic error:", e);
+        }
+    }
+
+    // Handle user response
+    recognition.onresult = async (event) => {
+        const userSpeech = event.results[0][0].transcript;
+        document.getElementById('transcript').innerText = `You: "${userSpeech}"`;
+        questionCount++;
+
+        if (questionCount < totalQuestions) {
+            const nextQuestion = await fetchAIResponse(userSpeech);
+            askQuestion(nextQuestion);
+        } else {
+            finishInterview();
+        }
+    };
+
+    function finishInterview() {
+        const statusText = document.getElementById('ai-status');
+        const transcript = document.getElementById('transcript');
+        const micContainer = document.getElementById('mic-container');
+
+        statusText.innerText = "Interview Complete";
+        transcript.innerText = "Processing final feedback...";
+        micContainer.classList.remove('mic-pulse', 'bg-green-500');
+        micContainer.classList.add('bg-blue-500');
+        
+        const finalSpeech = new SpeechUtterance("Thank you! The session is complete.");
+        synth.speak(finalSpeech);
+    }
+
+    recognition.onerror = (e) => {
+        document.getElementById('ai-status').innerText = "Mic Error.";
+    };
+</script>
+</body>
+</html>
