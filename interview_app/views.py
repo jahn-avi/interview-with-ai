@@ -132,3 +132,47 @@ def resume_analysis(request):
                 os.remove(uploaded_file_path)
 
     return render(request, 'interview_app/resume_analysis.html')
+
+def ai_questions(request):
+    if request.method == 'POST':
+        # Check if we are submitting the configuration or an answer
+        if 'skill' in request.POST:
+            # Step 1: Generate the Question
+            skill = request.POST.get('skill')
+            role = request.POST.get('role')
+            difficulty = request.POST.get('difficulty')
+            
+            prompt = f"Generate one technical interview question for a {role} role focusing on {skill} at a {difficulty} level. Return only the question text."
+            response = model.generate_content(prompt)
+            
+            return render(request, 'interview_app/quiz.html', {
+                'question': response.text,
+                'skill': skill,
+                'role': role,
+                'difficulty': difficulty
+            })
+            
+        elif 'user_answer' in request.POST:
+            # Step 2: Grade the Answer
+            question = request.POST.get('question')
+            answer = request.POST.get('user_answer')
+            
+            grade_prompt = f"""
+            Question: {question}
+            Candidate Answer: {answer}
+            
+            Role as a Senior Technical Interviewer. 
+            1. Provide a Score out of 10.
+            2. Provide a 'Model Answer'.
+            3. Give 'Feedback' on how to improve.
+            Format the output in clean HTML or Markdown.
+            """
+            response = model.generate_content(grade_prompt)
+            formatted_feedback = markdown.markdown(response.text, extensions=['nl2br', 'extra'])
+            
+            return render(request, 'interview_app/quiz_result.html', {
+                'feedback': formatted_feedback
+            })
+
+    # Initial landing state (GET request)
+    return render(request, 'interview_app/quiz_setup.html')

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Quiz | Interview.AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .skill-chip { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .role-card:hover { transform: translateY(-4px); }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+    <nav class="bg-white border-b p-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/dashboard/" class="text-2xl font-black text-red-600 tracking-tighter hover:opacity-80 transition">
+                INTERVIEW<span class="text-gray-400">.AI</span>
+            </a>
+            <a href="/dashboard/" class="text-gray-600 hover:text-red-600 font-bold transition flex items-center gap-2">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto py-16 px-6">
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-black text-gray-900 mb-4 tracking-tight">Quiz <span class="text-red-600">Config</span></h1>
+            <p class="text-gray-500 text-lg">Select your path to generate tailored interview questions.</p>
+        </div>
+
+        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-gray-100">
+            <form action="{% url 'ai_questions' %}" method="POST" class="space-y-12">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-[0.25em] mb-6">1. Select Target Role</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <label class="cursor-pointer group role-card">
+                            <input type="radio" name="role" value="Data Scientist" class="hidden peer" onclick="filterSkills('ds')" checked>
+                            <div class="h-full p-5 rounded-3xl border-2 border-gray-100 bg-white hover:border-red-200 peer-checked:border-red-600 peer-checked:bg-red-50 transition-all text-center">
+                                <i class="fas fa-brain text-2xl mb-3 text-gray-300 group-hover:text-red-600 peer-checked:text-red-600"></i>
+                                <p class="font-bold text-sm text-gray-600 peer-checked:text-red-600">Data Science</p>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer group role-card">
+                            <input type="radio" name="role" value="Full Stack Developer" class="hidden peer" onclick="filterSkills('web')">
+                            <div class="h-full p-5 rounded-3xl border-2 border-gray-100 bg-white hover:border-red-200 peer-checked:border-red-600 peer-checked:bg-red-50 transition-all text-center">
+                                <i class="fas fa-layer-group text-2xl mb-3 text-gray-300 group-hover:text-red-600 peer-checked:text-red-600"></i>
+                                <p class="font-bold text-sm text-gray-600 peer-checked:text-red-600">Full Stack</p>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer group role-card">
+                            <input type="radio" name="role" value="Cybersecurity Analyst" class="hidden peer" onclick="filterSkills('cyber')">
+                            <div class="h-full p-5 rounded-3xl border-2 border-gray-100 bg-white hover:border-red-200 peer-checked:border-red-600 peer-checked:bg-red-50 transition-all text-center">
+                                <i class="fas fa-shield-virus text-2xl mb-3 text-gray-300 group-hover:text-red-600 peer-checked:text-red-600"></i>
+                                <p class="font-bold text-sm text-gray-600 peer-checked:text-red-600">Cybersecurity</p>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer group role-card">
+                            <input type="radio" name="role" value="Systems Engineer" class="hidden peer" onclick="filterSkills('core')">
+                            <div class="h-full p-5 rounded-3xl border-2 border-gray-100 bg-white hover:border-red-200 peer-checked:border-red-600 peer-checked:bg-red-50 transition-all text-center">
+                                <i class="fas fa-microchip text-2xl mb-3 text-gray-300 group-hover:text-red-600 peer-checked:text-red-600"></i>
+                                <p class="font-bold text-sm text-gray-600 peer-checked:text-red-600">Core Engg</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-[0.25em] mb-6">2. Choose Focus Skill</label>
+                    <div id="skill-container" class="flex flex-wrap gap-3">
+                        <div class="skill-group ds flex flex-wrap gap-3">
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Deep Learning" class="hidden peer" checked><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Deep Learning</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Machine Learning" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Machine Learning</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="NLP" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">NLP</div></label>
+                        </div>
+
+                        <div class="skill-group web hidden flex flex-wrap gap-3">
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="React & Frontend" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">React.js</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Node.js" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Node.js</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Django/Python" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Django</div></label>
+                        </div>
+
+                        <div class="skill-group cyber hidden flex flex-wrap gap-3">
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Network Security" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Network Security</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Ethical Hacking" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Ethical Hacking</div></label>
+                        </div>
+
+                        <div class="skill-group core hidden flex flex-wrap gap-3">
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="Embedded Systems" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">Embedded Systems</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="IoT" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">IoT</div></label>
+                            <label class="cursor-pointer"><input type="radio" name="skill" value="VLSI Design" class="hidden peer"><div class="px-6 py-2 rounded-full border-2 border-gray-100 font-bold text-gray-500 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 transition">VLSI Design</div></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-[0.25em] mb-6">3. Difficulty Level</label>
+                    <div class="flex p-1.5 bg-gray-100 rounded-2xl">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="difficulty" value="Easy" class="hidden peer" checked>
+                            <div class="text-center py-4 rounded-xl font-bold text-gray-400 peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-md transition-all">Easy</div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="difficulty" value="Medium" class="hidden peer">
+                            <div class="text-center py-4 rounded-xl font-bold text-gray-400 peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-md transition-all">Medium</div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="difficulty" value="Hard" class="hidden peer">
+                            <div class="text-center py-4 rounded-xl font-bold text-gray-400 peer-checked:bg-white peer-checked:text-red-600 peer-checked:shadow-md transition-all">Hard</div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 text-white py-6 rounded-3xl font-black text-xl hover:bg-red-700 transition transform hover:scale-[1.02] shadow-2xl shadow-red-200">
+                    Generate Quiz
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function filterSkills(category) {
+            document.querySelectorAll('.skill-group').forEach(group => {
+                group.classList.add('hidden');
+            });
+            const activeGroup = document.querySelector('.skill-group.' + category);
+            activeGroup.classList.remove('hidden');
+            
+            const firstRadio = activeGroup.querySelector('input[type="radio"]');
+            if (firstRadio) firstRadio.checked = true;
+        }
+    </script>
+</body>
+</html>
