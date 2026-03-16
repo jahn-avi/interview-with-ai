@@ -7,12 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .red-gradient-text {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
         .card-hover:hover {
             border-color: #dc2626;
             box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.1);
@@ -21,7 +15,7 @@
 </head>
 <body class="bg-slate-50 font-sans min-h-screen">
     
-    <nav class="bg-white border-b border-gray-100 p-6">
+    <nav class="bg-white border-b border-gray-100 p-6 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <a href="/" class="text-2xl font-black text-red-600 tracking-tighter hover:opacity-80 transition">
                 INTERVIEW<span class="text-gray-400">.AI</span>
@@ -45,7 +39,7 @@
     <div class="max-w-7xl mx-auto py-16 px-6">
         <div class="mb-12">
             <h1 class="text-6xl font-black text-gray-900 leading-tight">
-             Welcome Back, <span class="text-red-600">{{ user_title }}!</span>
+              Welcome Back, <span class="text-red-600">{{ user_title }}!</span>
             </h1>
             <p class="text-gray-500 text-lg">Select an AI module to advance your career preparation.</p>
         </div>
@@ -58,7 +52,7 @@
                 </div>
                 <h3 class="text-2xl font-bold mb-3 text-gray-800">Resume Analysis</h3>
                 <p class="text-gray-500 mb-8 leading-relaxed">Smart feedback on skills and projects with a detailed score out of 100.</p>
-                <a href="/resume-analysis/" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
+                <a href="{% url 'resume_analysis' %}" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
                   Upload Resume <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
@@ -91,8 +85,8 @@
                 </div>
                 <h3 class="text-2xl font-bold mb-3 text-gray-800">Performance Report</h3>
                 <p class="text-gray-500 mb-8 leading-relaxed">Detailed analysis of technical, communication, and confidence scores.</p>
-                <a href="#" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
-                    View Analytics <i class="fas fa-arrow-right ml-2"></i>
+                <a href="{% url 'performance_report' %}" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
+                 View Analytics <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
 
@@ -102,7 +96,7 @@
                 </div>
                 <h3 class="text-2xl font-bold mb-3 text-gray-800">Learning Path</h3>
                 <p class="text-gray-500 mb-8 leading-relaxed">AI-suggested study topics to fix your specific weaknesses.</p>
-                <a href="#" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
+                <a href="{% url 'learning_path' %}" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
                     Explore Path <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>

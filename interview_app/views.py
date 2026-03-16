@@ -299,3 +299,40 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'interview_app/register.html', {'form': form})
+
+@login_required
+def performance_report(request):
+    # This data simulates your day's performance across all modules
+    context = {
+        'overall_score': 82,
+        'resume_score': 80,
+        'technical_score': 8.5,
+        'communication_score': 7.8,
+        'role': 'Data Science Specialist',
+        'status': 'Competitive',
+        'last_updated': "March 16, 2026"
+    }
+    return render(request, 'interview_app/performance_report.html', context)
+
+@login_required
+def learning_path(request):
+    # This context mimics AI-suggested topics based on your specific profile
+    context = {
+        'current_focus': 'Data Science & Full-Stack (Django)',
+        'milestones': [
+            {
+                'topic': 'Advanced Deep Learning Architectures',
+                'what': 'Focus on Transformers and Attention Mechanisms beyond standard CNNs.',
+                'how': 'Implement a small sentiment analysis model using HuggingFace.',
+                'where': 'Fast.ai or Stanford CS224N (YouTube).'
+            },
+            {
+                'topic': 'Django Performance Optimization',
+                'what': 'Database indexing, select_related, and prefetch_related for faster queries.',
+                'how': 'Audit your "Interview with AI" project for redundant database hits.',
+                'where': 'Official Django Documentation or TestDriven.io.'
+            }
+        ],
+        'last_updated': "March 16, 2026"
+    }
+    return render(request, 'interview_app/learning_path.html', context)

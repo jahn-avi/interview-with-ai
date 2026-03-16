@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Learning Path | Interview.AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+    
+    <nav class="bg-white border-b p-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="{% url 'dashboard' %}" class="text-2xl font-black text-red-600 tracking-tighter">
+                INTERVIEW<span class="text-gray-400">.AI</span>
+            </a>
+            <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-red-600 font-bold transition flex items-center gap-2">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto py-16 px-6">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-black text-gray-900 mb-4">Your AI <span class="text-red-600">Roadmap</span></h1>
+            <p class="text-gray-500 text-lg italic">Personalized for {{ current_focus }}</p>
+        </div>
+
+        <div class="space-y-8">
+            {% for milestone in milestones %}
+            <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-gray-100 transition-transform hover:scale-[1.01]">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="bg-red-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-gray-900">{{ milestone.topic }}</h3>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-5 bg-gray-50 rounded-3xl">
+                        <h4 class="text-xs font-black text-red-600 uppercase tracking-widest mb-2">What</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">{{ milestone.what }}</p>
+                    </div>
+                    <div class="p-5 bg-gray-50 rounded-3xl">
+                        <h4 class="text-xs font-black text-red-600 uppercase tracking-widest mb-2">How</h4>
+                        <p class="text-gray-600 text-sm leading-relaxed">{{ milestone.how }}</p>
+                    </div>
+                    <div class="p-5 bg-gray-50 rounded-3xl">
+                        <h4 class="text-xs font-black text-red-600 uppercase tracking-widest mb-2">Where</h4>
+                        <p class="text-blue-600 font-bold text-sm">{{ milestone.where }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-12 bg-red-600 p-10 rounded-[3rem] text-white text-center shadow-2xl shadow-red-200">
+            <h3 class="text-2xl font-black mb-4">Ready to test your new skills?</h3>
+            <p class="mb-8 opacity-90">Jump back into a technical quiz once you've reviewed these topics.</p>
+            <a href="{% url 'ai_questions' %}" class="bg-white text-red-600 px-10 py-4 rounded-2xl font-black hover:bg-gray-100 transition inline-block">
+                Generate Technical Quiz
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
