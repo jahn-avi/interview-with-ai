@@ -26,6 +26,19 @@
             <a href="/" class="text-2xl font-black text-red-600 tracking-tighter hover:opacity-80 transition">
                 INTERVIEW<span class="text-gray-400">.AI</span>
             </a>
+            
+            <div class="flex items-center gap-6">
+                <span class="text-gray-500 font-medium hidden md:inline">
+                    Hello, <span class="text-red-600 font-bold">{{ user.username }}</span>
+                </span>
+                
+                <form action="{% url 'logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-gray-50 text-gray-600 px-5 py-2 rounded-xl font-bold hover:bg-red-50 hover:text-red-600 transition flex items-center gap-2">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -67,7 +80,7 @@
                 </div>
                 <h3 class="text-2xl font-bold mb-3 text-gray-800">Voice Interview</h3>
                 <p class="text-gray-500 mb-8 leading-relaxed">Real-time simulation using Speech-to-Text for a natural conversation feel.</p>
-                <a href="{% url 'voice_setup' %}" class="inline-flex items-center text-red-600 font-black ...">
+                <a href="{% url 'voice_setup' %}" class="inline-flex items-center text-red-600 font-black uppercase tracking-wider text-sm group-hover:gap-3 transition-all">
                     Start Session <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
