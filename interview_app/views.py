@@ -10,6 +10,10 @@ import pyttsx3
 from django.http import JsonResponse
 import json
 import time
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 # 1. Load Environment Variables
 load_dotenv()
@@ -47,6 +51,7 @@ def about(request):
 def session(request):
     return render(request, 'interview_app/session.html', {'role': 'Data Science Candidate'})
 
+@login_required
 def dashboard(request):
     titles = [
         "Tech Enthusiast",
@@ -282,3 +287,15 @@ def voice_chat_api(request):
             return JsonResponse({'error': 'Server Busy'}, status=500)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}! You can now login.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'interview_app/register.html', {'form': form})

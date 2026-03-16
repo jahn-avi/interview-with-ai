@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Interview.AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-2xl border border-gray-100">
+        <div class="text-center mb-8">
+            <a href="/" class="text-2xl font-black text-red-600 tracking-tighter inline-block mb-4">
+                INTERVIEW<span class="text-gray-400">.AI</span>
+            </a>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Create Account</h1>
+            <p class="text-gray-500 mt-2">Join the future of AI interview prep.</p>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                {% for field in form %}
+                    <div>
+                        <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p class="text-red-600 text-xs mt-1 font-bold">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-red-700 transition transform hover:scale-[1.02] shadow-xl shadow-red-100">
+                Sign Up
+            </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p class="text-gray-500">Already have an account?</p>
+            <a href="{% url 'login' %}" class="text-red-600 font-black hover:text-red-800 transition">Log In Here</a>
+        </div>
+    </div>
+
+    <style>
+        /* Styling Django's default form inputs to match Tailwind */
+        input {
+            width: 100%;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border: 2px solid #f1f5f9;
+            border-radius: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus {
+            border-color: #dc2626;
+            background-color: white;
+        }
+    </style>
+</body>
+</html>
